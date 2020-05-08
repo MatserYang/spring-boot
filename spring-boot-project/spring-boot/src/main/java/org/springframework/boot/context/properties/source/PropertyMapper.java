@@ -1,5 +1,5 @@
 /*
- * Copyright 2012-2019 the original author or authors.
+ * Copyright 2012-2020 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 
 package org.springframework.boot.context.properties.source;
 
+import java.util.List;
+
 import org.springframework.core.env.EnumerablePropertySource;
 import org.springframework.core.env.PropertySource;
 
@@ -28,8 +30,7 @@ import org.springframework.core.env.PropertySource;
  * {@link SpringConfigurationPropertySource} to first attempt any direct mappings (i.e.
  * map the {@link ConfigurationPropertyName} directly to the {@link PropertySource} name)
  * before falling back to {@link EnumerablePropertySource enumerating} property names,
- * mapping them to a {@link ConfigurationPropertyName} and checking for
- * {@link PropertyMapping#isApplicable(ConfigurationPropertyName) applicability}. See
+ * mapping them to a {@link ConfigurationPropertyName} and checking for applicability. See
  * {@link SpringConfigurationPropertySource} for more details.
  *
  * @author Phillip Webb
@@ -38,21 +39,29 @@ import org.springframework.core.env.PropertySource;
  */
 interface PropertyMapper {
 
-	PropertyMapping[] NO_MAPPINGS = {};
-
 	/**
 	 * Provide mappings from a {@link ConfigurationPropertySource}
 	 * {@link ConfigurationPropertyName}.
 	 * @param configurationPropertyName the name to map
-	 * @return a stream of mappings or {@code Stream#empty()}
+	 * @return the mapped names or an empty list
 	 */
-	PropertyMapping[] map(ConfigurationPropertyName configurationPropertyName);
+	List<String> map(ConfigurationPropertyName configurationPropertyName);
 
 	/**
 	 * Provide mappings from a {@link PropertySource} property name.
 	 * @param propertySourceName the name to map
-	 * @return a stream of mappings or {@code Stream#empty()}
+	 * @return the mapped configuration property name or
+	 * {@link ConfigurationPropertyName#EMPTY}
 	 */
-	PropertyMapping[] map(String propertySourceName);
+	ConfigurationPropertyName map(String propertySourceName);
+
+	/**
+	 * Returns {@code true} if {@code name} is an ancestor (immediate or nested parent) of
+	 * the given candidate when considering mapping rules.
+	 * @param name the source name
+	 * @param candidate the candidate to check
+	 * @return {@code true} if the candidate is an ancestor of the name
+	 */
+	boolean isAncestorOf(ConfigurationPropertyName name, ConfigurationPropertyName candidate);
 
 }
